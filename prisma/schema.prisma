@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// prisma/schema.prisma
+
+model Teacher {
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String  @unique
+  password String
+  active   Boolean @default(true)
+  team     Team?   @relation(fields: [teamId], references: [id])
+  teamId   Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("teachers")
+}
+
+model Team {
+  id           Int          @id @default(autoincrement())
+  name         String
+  teachers     Teacher[]
+  students     Student[]
+  
+  
+  attendances  Attendance[]
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("teams")
+}
+
+model Student {
+  id           Int          @id @default(autoincrement())
+  name         String
+  dateOfBirth  DateTime     @db.Date
+  registration String       @unique
+  cpf          String       @unique
+  isActive     Boolean?     @default(true)
+  team         Team         @relation(fields: [teamId], references: [id])
+  teamId       Int
+  attendances  Attendance[]
+
+  @@map("students")
+}
+
+model Meeting {
+  id           Int          @id @default(autoincrement())
+  name         String
+  date         DateTime
+  
+  attendances  Attendance[] 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("meetings")
+}
+
+model Attendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @db.Date
+  present   Boolean
+  student   Student  @relation(fields: [studentId], references: [id])
+  studentId Int
+  team      Team     @relation(fields: [teamId], references: [id])
+  teamId    Int
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  meetingId Int
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("attendaces")
+}
+
